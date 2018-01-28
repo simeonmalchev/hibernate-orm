@@ -76,7 +76,6 @@ import org.hibernate.mapping.Table;
 import org.hibernate.mapping.Value;
 import org.hibernate.type.BagType;
 import org.hibernate.type.ComponentType;
-import org.hibernate.type.CustomType;
 import org.hibernate.type.ListType;
 import org.hibernate.type.ManyToOneType;
 import org.hibernate.type.MapType;
@@ -943,7 +942,11 @@ public final class CollectionMetadataGenerator {
 
 	@SuppressWarnings({"unchecked"})
 	private String searchMappedBy(PersistentClass referencedClass, Table collectionTable) {
-		final Iterator<Property> properties = referencedClass.getPropertyIterator();
+		return searchMappedBy( referencedClass.getPropertyIterator(), collectionTable );
+	}
+
+	@SuppressWarnings("unchecked")
+	private String searchMappedBy(Iterator<Property> properties, Table collectionTable) {
 		while ( properties.hasNext() ) {
 			final Property property = properties.next();
 			if ( property.getValue() instanceof Collection ) {
@@ -951,6 +954,17 @@ public final class CollectionMetadataGenerator {
 				//noinspection ObjectEquality
 				if ( ( (Collection) property.getValue() ).getCollectionTable() == collectionTable ) {
 					return property.getName();
+				}
+			}
+			else if ( property.getValue() instanceof Component ) {
+				// HHH-12240
+				// Should we find an embeddable, we should traverse it as well to see if the collection table
+				// happens to be an attribute inside the embeddable rather than directly on the entity.
+				final Component component = (Component) property.getValue();
+
+				final String mappedBy = searchMappedBy( component.getPropertyIterator(), collectionTable );
+				if ( mappedBy != null ) {
+					return property.getName() + "_" + mappedBy;
 				}
 			}
 		}

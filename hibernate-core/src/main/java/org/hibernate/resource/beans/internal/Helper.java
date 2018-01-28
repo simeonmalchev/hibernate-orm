@@ -6,9 +6,9 @@
  */
 package org.hibernate.resource.beans.internal;
 
-import java.util.Set;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
+import org.hibernate.resource.beans.container.spi.BeanLifecycleStrategy;
+import org.hibernate.resource.beans.container.internal.ContainerManagedLifecycleStrategy;
+import org.hibernate.resource.beans.container.internal.JpaCompliantLifecycleStrategy;
 
 /**
  * @author Steve Ebersole
@@ -22,21 +22,21 @@ public class Helper {
 	private Helper() {
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> Bean<T> getNamedBean(String beanName, Class<T> beanContract, BeanManager beanManager) {
-		Set<Bean<?>> beans = beanManager.getBeans( beanContract, new NamedBeanQualifier( beanName ) );
+	public String determineBeanCacheKey(Class beanType) {
+		return beanType.getName();
+	}
 
-		if ( beans.isEmpty() ) {
-			throw new IllegalArgumentException(
-					"BeanManager returned no matching beans: name = " + beanName + "; contract = " + beanContract.getName()
-			);
-		}
-		if ( beans.size() > 1 ) {
-			throw new IllegalArgumentException(
-					"BeanManager returned multiple matching beans: name = " + beanName + "; contract = " + beanContract.getName()
-			);
-		}
+	public String determineBeanCacheKey(String name, Class beanType) {
+		return beanType.getName() + ':' + name;
+	}
 
-		return (Bean<T>) beans.iterator().next();
+	@SuppressWarnings("unused")
+	public BeanLifecycleStrategy getLifecycleStrategy(boolean shouldRegistryManageLifecycle) {
+		if ( shouldRegistryManageLifecycle ) {
+			return JpaCompliantLifecycleStrategy.INSTANCE;
+		}
+		else {
+			return ContainerManagedLifecycleStrategy.INSTANCE;
+		}
 	}
 }

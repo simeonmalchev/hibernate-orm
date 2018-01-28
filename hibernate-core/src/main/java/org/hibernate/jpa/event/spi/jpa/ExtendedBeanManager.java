@@ -7,22 +7,21 @@
 package org.hibernate.jpa.event.spi.jpa;
 
 /**
- * @deprecated Use {@link org.hibernate.resource.beans.spi.ExtendedBeanManager} instead
+ * @deprecated Use {@link org.hibernate.resource.beans.container.spi.ExtendedBeanManager} instead
  */
 @Deprecated
-public interface ExtendedBeanManager extends org.hibernate.resource.beans.spi.ExtendedBeanManager {
-
+public interface ExtendedBeanManager extends org.hibernate.resource.beans.container.spi.ExtendedBeanManager {
 	void registerLifecycleListener(LifecycleListener lifecycleListener);
 
 	@Override
-	default void registerLifecycleListener(org.hibernate.resource.beans.spi.ExtendedBeanManager.LifecycleListener lifecycleListener) {
-		registerLifecycleListener( lifecycleListener::beanManagerInitialized );
+	default void registerLifecycleListener(org.hibernate.resource.beans.container.spi.ExtendedBeanManager.LifecycleListener lifecycleListener) {
+		registerLifecycleListener( (LifecycleListener) lifecycleListener );
 	}
 
 	/**
-	 * @deprecated Use {@link org.hibernate.resource.beans.spi.ExtendedBeanManager.LifecycleListener} instead
+	 * @deprecated Use {@link org.hibernate.resource.beans.container.spi.ExtendedBeanManager.LifecycleListener} instead
 	 */
 	@Deprecated
-	interface LifecycleListener extends org.hibernate.resource.beans.spi.ExtendedBeanManager.LifecycleListener {
+	interface LifecycleListener extends org.hibernate.resource.beans.container.spi.ExtendedBeanManager.LifecycleListener {
 	}
 }
